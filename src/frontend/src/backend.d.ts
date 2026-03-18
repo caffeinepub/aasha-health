@@ -9,6 +9,7 @@ export interface None {
 export type Option<T> = Some<T> | None;
 export interface PatientRecord {
     bloodType: string;
+    owner: Principal;
     patientId: string;
     encryptedNotes: string;
     createdAt: bigint;

@@ -16,6 +16,7 @@ export const UserRole = IDL.Variant({
 export const UserProfile = IDL.Record({ 'name' : IDL.Text });
 export const PatientRecord = IDL.Record({
   'bloodType' : IDL.Text,
+  'owner' : IDL.Principal,
   'patientId' : IDL.Text,
   'encryptedNotes' : IDL.Text,
   'createdAt' : IDL.Int,
@@ -63,6 +64,7 @@ export const idlFactory = ({ IDL }) => {
   const UserProfile = IDL.Record({ 'name' : IDL.Text });
   const PatientRecord = IDL.Record({
     'bloodType' : IDL.Text,
+    'owner' : IDL.Principal,
     'patientId' : IDL.Text,
     'encryptedNotes' : IDL.Text,
     'createdAt' : IDL.Int,

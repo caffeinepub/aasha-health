@@ -13,25 +13,38 @@ import {
   QrCode,
   User,
 } from "lucide-react";
+import QRCode from "qrcode";
+import { useEffect, useRef } from "react";
 import { useGetPatient } from "../hooks/useQueries";
 import { decrypt } from "../lib/encryption";
 
 function QRCodeImage({ patientId }: { patientId: string }) {
-  const url = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(patientId)}&bgcolor=ffffff&color=0B2D4D&margin=10`;
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    if (canvasRef.current) {
+      QRCode.toCanvas(canvasRef.current, patientId, {
+        width: 200,
+        margin: 2,
+        color: { dark: "#0B2D4D", light: "#ffffff" },
+      });
+    }
+  }, [patientId]);
 
   const handleDownload = () => {
+    if (!canvasRef.current) return;
     const link = document.createElement("a");
-    link.href = url;
+    link.href = canvasRef.current.toDataURL("image/png");
     link.download = `aasha-patient-${patientId.slice(0, 8)}.png`;
     link.click();
   };
 
   return (
     <div className="flex flex-col items-center gap-3">
-      <img
-        src={url}
-        alt="Patient QR Code"
-        className="w-48 h-48 rounded-xl border border-border"
+      <canvas
+        ref={canvasRef}
+        className="rounded-xl border border-border"
+        style={{ width: 200, height: 200 }}
       />
       <Button
         variant="outline"
@@ -223,7 +236,9 @@ function InfoRow({
         {icon} {label}
       </span>
       <p
-        className={`text-sm text-foreground font-medium ${multiline ? "whitespace-pre-wrap" : ""}`}
+        className={`text-sm text-foreground font-medium ${
+          multiline ? "whitespace-pre-wrap" : ""
+        }`}
       >
         {value || "—"}
       </p>

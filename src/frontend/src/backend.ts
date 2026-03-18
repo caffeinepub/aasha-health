@@ -91,6 +91,7 @@ export class ExternalBlob {
 }
 export interface PatientRecord {
     bloodType: string;
+    owner: Principal;
     patientId: string;
     encryptedNotes: string;
     createdAt: bigint;

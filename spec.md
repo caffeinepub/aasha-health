@@ -1,39 +1,34 @@
 # Aasha Health
 
 ## Current State
-New project, no existing application files.
+- Patients stored globally; all users see all patients
+- QR code generated via external API (api.qrserver.com) -- unreliable
+- QR scanner reads patient ID and calls getPatient(id)
+- Backend has no concept of patient ownership
 
 ## Requested Changes (Diff)
 
 ### Add
-- Patient registration with encrypted personal information (name, age, blood type, medical notes, emergency contact)
-- Auto-generated unique Patient ID for each patient
-- QR code generation tied to each patient's ID
-- QR code scanner to look up patient by scanning their QR code
-- Emergency call button that dials a configurable emergency number
-- Patient profile view showing decrypted info when authorized
-- Role-based access: admin can add/edit patients, staff can view/scan
-- Dashboard: total patients, recent registrations, quick access actions
+- `owner: Principal` field on PatientRecord to track who added the patient
+- `getPatient` checks ownership: only the owner or an admin can view
+- Local QR code generation using `qrcode` npm library (no external API calls)
 
 ### Modify
-N/A
+- `addPatient`: store `caller` as `owner` on the record
+- `listPatients`: returns only the caller's own patients; admins get all
+- `getPatient`: enforces ownership check (owner or admin only)
+- `updatePatient`: enforces ownership check
+- `deletePatient`: admin only (unchanged behavior)
+- PatientDetailPage: replace external QR image with canvas-rendered QR via `qrcode` library
 
 ### Remove
-N/A
+- Dependency on `https://api.qrserver.com` for QR code images
 
 ## Implementation Plan
-1. Backend (Motoko):
-   - Patient data model: id (auto UUID), name (encrypted), age (encrypted), bloodType, medicalNotes (encrypted), emergencyContact (encrypted), emergencyPhone, createdAt
-   - APIs: addPatient, getPatient, getAllPatients, updatePatient, deletePatient, searchPatientById
-   - Authorization integration: admin and staff roles
-   - Patient ID generation: short alphanumeric ID (e.g. AASHA-XXXXX)
-
-2. Frontend (React):
-   - Landing/login page
-   - Dashboard with stats cards and quick actions
-   - Patient list page
-   - Add/Edit patient form with encrypted fields
-   - Patient detail page showing profile + generated QR code for their ID
-   - QR code scanner page (camera-based)
-   - Emergency call button (prominent red button) in header/dashboard
-   - QR code display component per patient
+1. Update backend `PatientRecord` type to include `owner: Principal`
+2. Update `addPatient` to capture `caller` as `owner`
+3. Update `listPatients` to filter by `owner == caller` unless admin
+4. Update `getPatient` and `updatePatient` to check `owner == caller || isAdmin`
+5. Add `qrcode` npm package to frontend
+6. Replace `QRCodeImage` component in PatientDetailPage with canvas-based local rendering
+7. Ensure QR scanner still passes raw patientId string to getPatient lookup
